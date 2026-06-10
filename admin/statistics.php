@@ -93,7 +93,7 @@ if ($selected_month) {
     ");
     $daily_stmt->execute([':year_month' => $year_month]);
     $daily_stats = $daily_stmt->fetchAll();
-    
+
     $days_in_month = cal_days_in_month(CAL_GREGORIAN, $selected_month, $selected_year);
     for ($i = 1; $i <= $days_in_month; $i++) {
         $found = false;
@@ -158,6 +158,7 @@ $years = $year_stmt->fetchAll();
 
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -191,7 +192,7 @@ $years = $year_stmt->fetchAll();
         .sidebar-header {
             padding: 25px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .sidebar-header i {
@@ -211,13 +212,14 @@ $years = $year_stmt->fetchAll();
         .sidebar-menu a {
             display: block;
             padding: 12px 25px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: 0.3s;
         }
 
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background: rgba(255,255,255,0.1);
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.1);
             color: white;
         }
 
@@ -234,7 +236,7 @@ $years = $year_stmt->fetchAll();
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .stats-grid {
@@ -249,7 +251,7 @@ $years = $year_stmt->fetchAll();
             padding: 20px;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s;
         }
 
@@ -267,7 +269,7 @@ $years = $year_stmt->fetchAll();
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .chart-card h4 {
@@ -304,12 +306,14 @@ $years = $year_stmt->fetchAll();
             .sidebar {
                 left: -260px;
             }
+
             .main-content {
                 margin-left: 0;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
@@ -380,7 +384,7 @@ $years = $year_stmt->fetchAll();
             <p>📊 Tỷ lệ giải quyết: <strong><?php echo $resolve_rate; ?>%</strong> (<?php echo number_format($stats['resolved'] ?? 0); ?>/<?php echo number_format($stats['total']); ?> báo cáo)</p>
             <p>⏳ Còn <strong><?php echo number_format($stats['pending'] ?? 0); ?> báo cáo</strong> đang chờ xử lý (<?php echo $pending_percent; ?>%)</p>
             <?php if ($avg_processing_time > 0): ?>
-            <p>⚡ Thời gian xử lý trung bình: <strong><?php echo round($avg_processing_time, 1); ?> giờ</strong></p>
+                <p>⚡ Thời gian xử lý trung bình: <strong><?php echo round($avg_processing_time, 1); ?> giờ</strong></p>
             <?php endif; ?>
         </div>
 
@@ -389,25 +393,25 @@ $years = $year_stmt->fetchAll();
             <form method="GET" class="d-flex gap-3 align-items-center flex-wrap">
                 <label class="fw-bold">📅 Thống kê theo:</label>
                 <select name="year" class="form-select w-auto">
-                    <?php foreach($years as $y): ?>
+                    <?php foreach ($years as $y): ?>
                         <option value="<?php echo $y['year']; ?>" <?php echo $selected_year == $y['year'] ? 'selected' : ''; ?>>
                             Năm <?php echo $y['year']; ?>
                         </option>
                     <?php endforeach; ?>
-                    <?php if(empty($years)): ?>
+                    <?php if (empty($years)): ?>
                         <option value="<?php echo $current_year; ?>">Năm <?php echo $current_year; ?></option>
                     <?php endif; ?>
                 </select>
                 <select name="month" class="form-select w-auto">
                     <option value="">Tất cả các tháng</option>
-                    <?php for($m = 1; $m <= 12; $m++): ?>
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
                         <option value="<?php echo $m; ?>" <?php echo $selected_month == $m ? 'selected' : ''; ?>>
                             Tháng <?php echo $m; ?>
                         </option>
                     <?php endfor; ?>
                 </select>
                 <button type="submit" class="btn btn-primary"><i class="fas fa-chart-line"></i> Xem thống kê</button>
-                <?php if($selected_month || $selected_year != $current_year): ?>
+                <?php if ($selected_month || $selected_year != $current_year): ?>
                     <a href="statistics.php" class="btn btn-secondary">Reset</a>
                 <?php endif; ?>
             </form>
@@ -447,56 +451,641 @@ $years = $year_stmt->fetchAll();
             </div>
         </div>
 
-        <?php if($selected_month): ?>
-        <div class="chart-card">
-            <h4><i class="fas fa-calendar-day"></i> Báo cáo theo ngày (Tháng <?php echo $selected_month; ?>/<?php echo $selected_year; ?>)</h4>
-            <canvas id="dailyChart" style="max-height: 300px;"></canvas>
-        </div>
+        <?php if ($selected_month): ?>
+            <div class="chart-card">
+                <h4><i class="fas fa-calendar-day"></i> Báo cáo theo ngày (Tháng <?php echo $selected_month; ?>/<?php echo $selected_year; ?>)</h4>
+                <canvas id="dailyChart" style="max-height: 300px;"></canvas>
+            </div>
         <?php endif; ?>
 
         <div class="row">
             <!-- Biểu đồ 5: Phân loại sự cố -->
-            <div class="col-md-6">
+            <div class="col-12">
                 <div class="chart-card">
-                    <h4><i class="fas fa-tags"></i> Phân loại sự cố</h4>
-                    <canvas id="categoryChart" style="max-height: 300px;"></canvas>
-                </div>
-            </div>
+                    <!-- ==================== PHÂN LOẠI SỰ CỐ - CẢNH BÁO ==================== -->
 
-            <!-- Biểu đồ 6: Top người báo cáo -->
-            <div class="col-md-6">
-                <div class="chart-card">
-                    <h4><i class="fas fa-users"></i> Top 10 người báo cáo nhiều nhất</h4>
-                    <canvas id="reporterChart" style="max-height: 300px;"></canvas>
+                    <div class="chart-card" style="border-left: 4px solid #dc3545;">
+                        <h4 style="color: #dc3545;">
+                            <i class="fas fa-tags"></i> ⚠️ PHÂN LOẠI SỰ CỐ - Các loại sự cố thường gặp
+                        </h4>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-chart-pie"></i> Thống kê chi tiết theo từng loại sự cố cần được kiểm soát
+                        </p>
+
+                        <?php
+                        // Lấy thống kê phân loại sự cố từ JSON (chính xác hơn)
+                        $category_stats = $pdo->query("
+                            SELECT phan_loai_su_co_json, COUNT(*) as report_count
+                            FROM baocao 
+                            WHERE phan_loai_su_co_json IS NOT NULL AND phan_loai_su_co_json != ''
+                            GROUP BY phan_loai_su_co_json
+                        ")->fetchAll();
+
+                        // Xử lý và đếm từng loại sự cố
+                        $category_breakdown = [];
+
+                        foreach ($category_stats as $stat) {
+                            $categories = json_decode($stat['phan_loai_su_co_json'], true);
+                            if (is_array($categories)) {
+                                foreach ($categories as $cat) {
+                                    // Chuẩn hóa tên category
+                                    $cat_clean = trim($cat);
+                                    if (!isset($category_breakdown[$cat_clean])) {
+                                        $category_breakdown[$cat_clean] = 0;
+                                    }
+                                    $category_breakdown[$cat_clean] += $stat['report_count'];
+                                }
+                            }
+                        }
+
+                        // Sắp xếp theo số lượng giảm dần
+                        arsort($category_breakdown);
+
+                        // Lấy thống kê mức độ nghiêm trọng theo từng loại
+                        $all_categories = array_keys($category_breakdown);
+                        $severity_by_category = [];
+
+                        foreach ($all_categories as $cat) {
+                            // Đếm số báo cáo NC3 theo từng loại
+                            $stmt = $pdo->prepare("
+                                SELECT COUNT(*) as critical_count
+                                FROM baocao 
+                                WHERE muc_do_su_co = 'NC3' 
+                                AND (phan_loai_su_co LIKE :cat OR phan_loai_su_co_json LIKE :cat_json)
+                            ");
+                            $like_cat = '%' . $cat . '%';
+                            $stmt->execute([':cat' => $like_cat, ':cat_json' => $like_cat]);
+                            $severity_by_category[$cat] = $stmt->fetch()['critical_count'];
+                        }
+
+                        $total_incidents = array_sum($category_breakdown);
+                        ?>
+
+                        <!-- Cảnh báo tổng quan -->
+                        <div class="alert alert-danger mb-4" style="background: #fff5f5; border-left: 4px solid #dc3545;">
+                            <i class="fas fa-chart-line"></i>
+                            <strong>THỐNG KÊ SỰ CỐ:</strong> Tổng số sự cố đã ghi nhận: <strong><?php echo $total_incidents; ?> lượt</strong>
+                            , tập trung vào <strong><?php echo count($category_breakdown); ?> nhóm</strong> sự cố chính.
+                        </div>
+
+                        <?php if (!empty($category_breakdown)): ?>
+                            <!-- Bảng phân loại sự cố -->
+                            <div class="table-responsive mb-4">
+                                <table class="table table-bordered table-hover">
+                                    <thead style="background: #dc3545; color: white;">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Loại sự cố</th>
+                                            <th>Số lượng</th>
+                                            <th>Tỷ lệ</th>
+                                            <th>Mức độ NC3</th>
+                                            <th>Mức cảnh báo</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $rank = 1;
+                                        $max_count = max($category_breakdown);
+                                        foreach ($category_breakdown as $category => $count):
+                                            $percentage = round(($count / $total_incidents) * 100, 1);
+                                            $bar_width = ($count / $max_count) * 100;
+                                            $critical_count = $severity_by_category[$category] ?? 0;
+                                            $critical_rate = $count > 0 ? round(($critical_count / $count) * 100, 1) : 0;
+
+                                            // Xác định mức độ cảnh báo
+                                            if ($count >= 20 || $critical_rate >= 30) {
+                                                $warning_level = "CẢNH BÁO ĐỎ";
+                                                $warning_class = "danger";
+                                                $warning_icon = "🔴";
+                                                $status = "Cần xử lý ngay";
+                                            } elseif ($count >= 10 || $critical_rate >= 15) {
+                                                $warning_level = "CẢNH BÁO CAM";
+                                                $warning_class = "warning";
+                                                $warning_icon = "🟠";
+                                                $status = "Cần theo dõi";
+                                            } else {
+                                                $warning_level = "CẢNH BÁO VÀNG";
+                                                $warning_class = "info";
+                                                $warning_icon = "🟡";
+                                                $status = "Bình thường";
+                                            }
+                                        ?>
+                                            <tr style="background: <?php echo $rank <= 3 ? '#fff5f5' : 'white'; ?>;">
+                                                <td class="text-center">
+                                                    <span class="badge bg-<?php echo $warning_class; ?>" style="font-size: 14px;">
+                                                        <?php echo $warning_icon; ?> #<?php echo $rank++; ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <strong><?php echo htmlspecialchars($category); ?></strong>
+                                                    <?php if ($rank <= 4): ?>
+                                                        <span class="badge bg-danger ms-2">⚠️ Cần kiểm soát</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-dark" style="font-size: 14px;"><?php echo $count; ?> lượt</span>
+                                                </td>
+                                                <td style="min-width: 150px;">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1" style="height: 10px;">
+                                                            <div class="progress-bar bg-<?php echo $warning_class; ?>" style="width: <?php echo $bar_width; ?>%"></div>
+                                                        </div>
+                                                        <span class="ms-2 small"><?php echo $percentage; ?>%</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-danger">💀 <?php echo $critical_count; ?> nghiêm trọng</span>
+                                                    <small class="text-muted d-block">(<?php echo $critical_rate; ?>%)</small>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-<?php echo $warning_class; ?>">
+                                                        <?php echo $warning_level; ?>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <?php if ($warning_level == 'CẢNH BÁO ĐỎ'): ?>
+                                                        <i class="fas fa-exclamation-circle text-danger"></i> <?php echo $status; ?>
+                                                    <?php elseif ($warning_level == 'CẢNH BÁO CAM'): ?>
+                                                        <i class="fas fa-exclamation-triangle text-warning"></i> <?php echo $status; ?>
+                                                    <?php else: ?>
+                                                        <i class="fas fa-check-circle text-success"></i> <?php echo $status; ?>
+                                                    <?php endif; ?>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Biểu đồ phân loại sự cố (Horizontal Bar) -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <canvas id="categoryChart" style="max-height: 400px;"></canvas>
+                                </div>
+                                <div class="col-md-6">
+                                    <canvas id="categorySeverityChart" style="max-height: 400px;"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Kết luận và khuyến nghị -->
+                            <div class="alert alert-warning mt-4" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                                <i class="fas fa-clipboard-list"></i>
+                                <strong>ĐÁNH GIÁ & KHUYẾN NGHỊ:</strong>
+                                <ul class="mt-2 mb-0">
+                                    <?php
+                                    $top_category = array_key_first($category_breakdown);
+                                    $top_count = $category_breakdown[$top_category] ?? 0;
+                                    ?>
+                                    <li>🔴 <strong>Loại sự cố phổ biến nhất:</strong> "<?php echo htmlspecialchars($top_category); ?>" với <?php echo $top_count; ?> lượt</li>
+                                    <li>⚠️ Tập trung kiểm soát các loại sự cố có tỷ lệ NC3 cao (màu đỏ)</li>
+                                    <li>📋 Tổ chức đào tạo chuyên sâu về <?php echo htmlspecialchars($top_category); ?> cho nhân viên</li>
+                                    <li>✅ Cập nhật quy trình xử lý các loại sự cố thường gặp</li>
+                                    <li>📊 Theo dõi sát sao các loại sự cố có xu hướng gia tăng</li>
+                                </ul>
+                            </div>
+
+                        <?php else: ?>
+                            <div class="alert alert-info text-center py-5">
+                                <i class="fas fa-chart-simple fa-3x mb-3 d-block"></i>
+                                <h5>Chưa có dữ liệu phân loại sự cố</h5>
+                                <p>Khi có báo cáo được gửi, thống kê sẽ hiển thị tại đây</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
+
+                <script>
+                    // Biểu đồ phân loại sự cố - Horizontal Bar
+                    <?php if (!empty($category_breakdown)): ?>
+                        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+                        new Chart(categoryCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: <?php echo json_encode(array_keys($category_breakdown)); ?>,
+                                datasets: [{
+                                    label: '⚠️ Số lượng sự cố',
+                                    data: <?php echo json_encode(array_values($category_breakdown)); ?>,
+                                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                    borderColor: 'rgba(220, 53, 69, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 5
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            font: {
+                                                size: 12,
+                                                weight: 'bold'
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return 'Số lượng: ' + context.raw + ' báo cáo';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Số lượng báo cáo',
+                                            font: {
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'Loại sự cố',
+                                            font: {
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        ticks: {
+                                            font: {
+                                                size: 11
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        // Biểu đồ mức độ nghiêm trọng theo từng loại
+                        const severityCtx = document.getElementById('categorySeverityChart').getContext('2d');
+                        new Chart(severityCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: <?php echo json_encode(array_keys($category_breakdown)); ?>,
+                                datasets: [{
+                                    label: '💀 Số lượng NC3 (Nghiêm trọng)',
+                                    data: <?php echo json_encode(array_values($severity_by_category)); ?>,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                    borderColor: 'rgba(0, 0, 0, 1)',
+                                    borderWidth: 1,
+                                    borderRadius: 5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        position: 'top',
+                                        labels: {
+                                            font: {
+                                                size: 12,
+                                                weight: 'bold'
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return context.raw + ' báo cáo mức độ nghiêm trọng';
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Số lượng NC3',
+                                            font: {
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        ticks: {
+                                            stepSize: 1
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Loại sự cố',
+                                            font: {
+                                                weight: 'bold'
+                                            }
+                                        },
+                                        ticks: {
+                                            maxRotation: 45,
+                                            minRotation: 45,
+                                            font: {
+                                                size: 11
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    <?php endif; ?>
+                </script>
             </div>
         </div>
 
-        <!-- Bảng chi tiết -->
-        <div class="chart-card">
-            <h4><i class="fas fa-table"></i> Chi tiết thống kê theo tháng (Năm <?php echo $selected_year; ?>)</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
+        <!-- Biểu đồ 6: Top người báo cáo -->
+        <div class="col-12">
+            <!-- ==================== TOP 10 NGƯỜI BÁO CÁO NHIỀU NHẤT (PHÊ BÌNH) ==================== -->
+            <div class="chart-card" style="border-left: 4px solid #dc3545;">
+                <h4 style="color: #dc3545;">
+                    <i class="fas fa-exclamation-triangle"></i> ⚠️ CẢNH BÁO: Top 10 người có số lượng báo cáo nhiều nhất
+                </h4>
+                <p class="text-muted mb-3">
+                    <i class="fas fa-chart-line"></i> Những cá nhân cần chú ý cải thiện chất lượng công việc
+                </p>
+
+                <?php
+                // Lấy dữ liệu top 10 người báo cáo
+                $top_reporters = $pdo->query("
+                    SELECT 
+                        nguoibaocao, 
+                        COUNT(*) as total,
+                        SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as resolved,
+                        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                        SUM(CASE WHEN muc_do_su_co = 'NC3' THEN 1 ELSE 0 END) as critical,
+                        MAX(created_at) as last_report
+                    FROM baocao 
+                    WHERE nguoibaocao IS NOT NULL AND nguoibaocao != ''
+                    GROUP BY nguoibaocao 
+                    ORDER BY total DESC 
+                    LIMIT 10
+                ")->fetchAll();
+
+                // Tính tổng số báo cáo để hiển thị cảnh báo
+                $total_reports = array_sum(array_column($top_reporters, 'total'));
+                ?>
+
+                <!-- Cảnh báo đầu trang -->
+                <div class="alert alert-danger mb-4" style="background: #fff5f5; border-left: 4px solid #dc3545;">
+                    <i class="fas fa-bell"></i>
+                    <strong>THỐNG KÊ CẢNH BÁO:</strong> Có <strong><?php echo count($top_reporters); ?> người</strong> đang có số lượng báo cáo sự cố cao,
+                    tổng cộng <strong><?php echo $total_reports; ?> báo cáo</strong> cần được xem xét và cải thiện.
+                </div>
+
+                <?php if (!empty($top_reporters)): ?>
+                    <!-- Bảng xếp hạng "phê bình" -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-hover">
+                            <thead style="background: #dc3545; color: white;">
+                                <tr>
+                                    <th style="width: 60px;">#</th>
+                                    <th>Cá nhân</th>
+                                    <th style="width: 120px;">Số báo cáo</th>
+                                    <th style="width: 120px;">Chưa xử lý</th>
+                                    <th style="width: 120px;">Mức độ NC3</th>
+                                    <th style="width: 150px;">Mức độ nghiêm trọng</th>
+                                    <th style="width: 120px;">Cảnh báo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $rank = 1;
+                                $max_total = $top_reporters[0]['total'] ?? 1;
+                                foreach ($top_reporters as $reporter):
+                                    $pending_rate = $reporter['total'] > 0 ? round($reporter['pending'] / $reporter['total'] * 100, 1) : 0;
+                                    $critical_rate = $reporter['total'] > 0 ? round($reporter['critical'] / $reporter['total'] * 100, 1) : 0;
+                                    $bar_width = ($reporter['total'] / $max_total) * 100;
+
+                                    // Xác định mức độ cảnh báo
+                                    if ($rank == 1) {
+                                        $warning_level = "Cảnh báo đỏ";
+                                        $warning_class = "danger";
+                                        $warning_icon = "🔴";
+                                    } elseif ($rank <= 3) {
+                                        $warning_level = "Cảnh báo cam";
+                                        $warning_class = "warning";
+                                        $warning_icon = "🟠";
+                                    } else {
+                                        $warning_level = "Cảnh báo vàng";
+                                        $warning_class = "info";
+                                        $warning_icon = "🟡";
+                                    }
+                                ?>
+                                    <tr style="background: <?php echo $rank <= 3 ? '#fff5f5' : 'white'; ?>;">
+                                        <td class="text-center">
+                                            <span class="badge bg-<?php echo $warning_class; ?>" style="font-size: 16px; padding: 5px 10px;">
+                                                <?php echo $warning_icon; ?> #<?php echo $rank; ?>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong><?php echo htmlspecialchars($reporter['nguoibaocao']); ?></strong>
+                                            <?php if ($rank <= 3): ?>
+                                                <span class="badge bg-danger ms-2">Cần kiểm điểm</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-dark" style="font-size: 14px; padding: 6px 12px;">
+                                                📊 <?php echo $reporter['total']; ?> báo cáo
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">⏳ <?php echo $reporter['pending']; ?> chưa xử lý</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger">⚠️ <?php echo $reporter['critical']; ?> nghiêm trọng</span>
+                                        </td>
+                                        <td style="min-width: 150px;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-danger" style="width: <?php echo $critical_rate; ?>%"></div>
+                                                </div>
+                                                <span class="ms-2 small text-danger"><?php echo $critical_rate; ?>% NC3</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-<?php echo $warning_class; ?>">
+                                                <?php echo $warning_level; ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php $rank++;
+                                endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Biểu đồ cột với tông màu đỏ cam -->
+                    <canvas id="topReporterChart" style="max-height: 400px;"></canvas>
+
+                    <!-- Kết luận cảnh báo -->
+                    <div class="alert alert-warning mt-4" style="background: #fff3cd; border-left: 4px solid #ffc107;">
+                        <i class="fas fa-clipboard-list"></i>
+                        <strong>KHUYẾN NGHỊ:</strong>
+                        <ul class="mt-2 mb-0">
+                            <li>✅ Rà soát quy trình làm việc của những cá nhân có số lượng báo cáo cao</li>
+                            <li>✅ Tổ chức đào tạo bồi dưỡng nghiệp vụ cho các khoa/phòng có nhiều sự cố</li>
+                            <li>✅ Theo dõi sát sao tiến độ xử lý các báo cáo mức độ NC3</li>
+                            <li>✅ Đề xuất giải pháp phòng ngừa sự cố tái diễn</li>
+                        </ul>
+                    </div>
+
+                <?php else: ?>
+                    <div class="alert alert-success text-center py-5">
+                        <i class="fas fa-check-circle fa-3x mb-3 d-block"></i>
+                        <h5>Chưa có dữ liệu báo cáo</h5>
+                        <p>Hệ thống đang hoạt động tốt</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <script>
+                // Biểu đồ Top người báo cáo - Tông màu đỏ cam (phê bình)
+                <?php if (!empty($top_reporters)): 
+                ?>
+                const topReporterCtx = document.getElementById('topReporterChart').getContext('2d');
+                new Chart(topReporterCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: <?php echo json_encode(array_column($top_reporters, 'nguoibaocao')); ?>,
+                        datasets: [{
+                                label: '⚠️ Tổng số báo cáo',
+                                data: <?php echo json_encode(array_column($top_reporters, 'total')); ?>,
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                barPercentage: 0.6
+                            },
+                            {
+                                label: '🔴 Chưa xử lý',
+                                data: <?php echo json_encode(array_column($top_reporters, 'pending')); ?>,
+                                backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                                borderColor: 'rgba(255, 193, 7, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                barPercentage: 0.6
+                            },
+                            {
+                                label: '💀 Mức độ NC3',
+                                data: <?php echo json_encode(array_column($top_reporters, 'critical')); ?>,
+                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                borderColor: 'rgba(0, 0, 0, 1)',
+                                borderWidth: 2,
+                                borderRadius: 8,
+                                barPercentage: 0.6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    usePointStyle: true,
+                                    boxWidth: 10
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw + ' báo cáo';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    precision: 0,
+                                    callback: function(value) {
+                                        return value + ' báo cáo';
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Số lượng báo cáo',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    borderDash: [5, 5],
+                                    color: '#f0f0f0'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Người báo cáo',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    }
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45,
+                                    autoSkip: true,
+                                    font: {
+                                        size: 11,
+                                        weight: 'bold'
+                                    }
+                                }
+                            }
+                        },
+                        elements: {
+                            bar: {
+                                borderSkipped: 'round',
+                                borderRadius: 8
+                            }
+                        }
+                    }
+                });
+                <?php endif; 
+                ?>
+            </script>
+        </div>
+    
+    <!-- Bảng chi tiết -->
+    <div class="chart-card">
+        <h4><i class="fas fa-table"></i> Chi tiết thống kê theo tháng (Năm <?php echo $selected_year; ?>)</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Tháng</th>
+                        <th>Tổng số báo cáo</th>
+                        <th>Đã giải quyết</th>
+                        <th>Tỷ lệ giải quyết</th>
+                        <th>Chưa giải quyết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $month_names = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+                    for ($i = 1; $i <= 12; $i++):
+                        $total = $monthly_data[$i]['total'];
+                        $resolved = $monthly_data[$i]['resolved'];
+                        $rate = $total > 0 ? round($resolved / $total * 100, 1) : 0;
+                        $pending = $total - $resolved;
+                    ?>
                         <tr>
-                            <th>Tháng</th>
-                            <th>Tổng số báo cáo</th>
-                            <th>Đã giải quyết</th>
-                            <th>Tỷ lệ giải quyết</th>
-                            <th>Chưa giải quyết</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $month_names = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-                        for($i = 1; $i <= 12; $i++): 
-                            $total = $monthly_data[$i]['total'];
-                            $resolved = $monthly_data[$i]['resolved'];
-                            $rate = $total > 0 ? round($resolved / $total * 100, 1) : 0;
-                            $pending = $total - $resolved;
-                        ?>
-                        <tr>
-                            <td><?php echo $month_names[$i-1]; ?></td>
+                            <td><?php echo $month_names[$i - 1]; ?></td>
                             <td><?php echo number_format($total); ?></td>
                             <td><?php echo number_format($resolved); ?></td>
                             <td>
@@ -508,12 +1097,13 @@ $years = $year_stmt->fetchAll();
                             </td>
                             <td><?php echo number_format($pending); ?></td>
                         </tr>
-                        <?php endfor; ?>
-                    </tbody>
-                </table>
-            </div>
+                    <?php endfor; ?>
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+</div>
 
     <script>
         // Dữ liệu cho biểu đồ
@@ -528,75 +1118,75 @@ $years = $year_stmt->fetchAll();
         };
 
         const severityData = {
-            labels: <?php 
-                $severity_labels = [];
-                $severity_counts = [];
-                foreach($severity_stats as $s) {
-                    $severity_labels[] = $s['muc_do_su_co'];
-                    $severity_counts[] = $s['count'];
-                }
-                echo json_encode($severity_labels);
-            ?>,
+            labels: <?php
+                    $severity_labels = [];
+                    $severity_counts = [];
+                    foreach ($severity_stats as $s) {
+                        $severity_labels[] = $s['muc_do_su_co'];
+                        $severity_counts[] = $s['count'];
+                    }
+                    echo json_encode($severity_labels);
+                    ?>,
             values: <?php echo json_encode($severity_counts); ?>
         };
 
         const locationData = {
-            labels: <?php 
-                $location_labels = array_slice(array_column($location_stats, 'location'), 0, 5);
-                $location_counts = array_slice(array_column($location_stats, 'count'), 0, 5);
-                echo json_encode($location_labels);
-            ?>,
+            labels: <?php
+                    $location_labels = array_slice(array_column($location_stats, 'location'), 0, 5);
+                    $location_counts = array_slice(array_column($location_stats, 'count'), 0, 5);
+                    echo json_encode($location_labels);
+                    ?>,
             values: <?php echo json_encode($location_counts); ?>
         };
 
         const trendData = {
             labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
             total: [
-                <?php 
-                for($i = 1; $i <= 12; $i++) {
+                <?php
+                for ($i = 1; $i <= 12; $i++) {
                     echo $monthly_data[$i]['total'] . ($i < 12 ? ',' : '');
                 }
                 ?>
             ],
             resolved: [
-                <?php 
-                for($i = 1; $i <= 12; $i++) {
+                <?php
+                for ($i = 1; $i <= 12; $i++) {
                     echo $monthly_data[$i]['resolved'] . ($i < 12 ? ',' : '');
                 }
                 ?>
             ]
         };
 
-        <?php if($selected_month): ?>
-        const dailyData = {
-            labels: <?php 
-                $daily_labels = [];
-                $daily_values = [];
-                for($i = 1; $i <= $days_in_month; $i++) {
-                    $daily_labels[] = 'Ngày ' . $i;
-                    $daily_values[] = $daily_data[$i];
-                }
-                echo json_encode($daily_labels);
-            ?>,
-            values: <?php echo json_encode($daily_values); ?>
-        };
+        <?php if ($selected_month): ?>
+            const dailyData = {
+                labels: <?php
+                        $daily_labels = [];
+                        $daily_values = [];
+                        for ($i = 1; $i <= $days_in_month; $i++) {
+                            $daily_labels[] = 'Ngày ' . $i;
+                            $daily_values[] = $daily_data[$i];
+                        }
+                        echo json_encode($daily_labels);
+                        ?>,
+                values: <?php echo json_encode($daily_values); ?>
+            };
         <?php endif; ?>
 
         const categoryData = {
-            labels: <?php 
-                $category_labels = array_keys(array_slice($category_breakdown, 0, 7));
-                $category_values = array_values(array_slice($category_breakdown, 0, 7));
-                echo json_encode($category_labels);
-            ?>,
+            labels: <?php
+                    $category_labels = array_keys(array_slice($category_breakdown, 0, 7));
+                    $category_values = array_values(array_slice($category_breakdown, 0, 7));
+                    echo json_encode($category_labels);
+                    ?>,
             values: <?php echo json_encode($category_values); ?>
         };
 
         const reporterData = {
-            labels: <?php 
-                $reporter_labels = array_column($reporter_stats, 'nguoibaocao');
-                $reporter_counts = array_column($reporter_stats, 'count');
-                echo json_encode($reporter_labels);
-            ?>,
+            labels: <?php
+                    $reporter_labels = array_column($reporter_stats, 'nguoibaocao');
+                    $reporter_counts = array_column($reporter_stats, 'count');
+                    echo json_encode($reporter_labels);
+                    ?>,
             values: <?php echo json_encode($reporter_counts); ?>
         };
 
@@ -646,8 +1236,7 @@ $years = $year_stmt->fetchAll();
             type: 'line',
             data: {
                 labels: trendData.labels,
-                datasets: [
-                    {
+                datasets: [{
                         label: 'Tổng số báo cáo',
                         data: trendData.total,
                         borderColor: '#667eea',
@@ -667,19 +1256,19 @@ $years = $year_stmt->fetchAll();
             }
         });
 
-        <?php if($selected_month): ?>
-        // Biểu đồ theo ngày
-        new Chart(document.getElementById('dailyChart'), {
-            type: 'bar',
-            data: {
-                labels: dailyData.labels,
-                datasets: [{
-                    label: 'Số báo cáo',
-                    data: dailyData.values,
-                    backgroundColor: '#17a2b8'
-                }]
-            }
-        });
+        <?php if ($selected_month): ?>
+            // Biểu đồ theo ngày
+            new Chart(document.getElementById('dailyChart'), {
+                type: 'bar',
+                data: {
+                    labels: dailyData.labels,
+                    datasets: [{
+                        label: 'Số báo cáo',
+                        data: dailyData.values,
+                        backgroundColor: '#17a2b8'
+                    }]
+                }
+            });
         <?php endif; ?>
 
         // Biểu đồ phân loại
@@ -715,4 +1304,5 @@ $years = $year_stmt->fetchAll();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

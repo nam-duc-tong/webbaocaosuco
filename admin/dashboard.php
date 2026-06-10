@@ -70,6 +70,7 @@ $resolved = $pdo->query("SELECT COUNT(*) FROM baocao WHERE status = 'resolved'")
         .badge-pending { background: #ffc107; color: #333; }
         .badge-processing { background: #17a2b8; color: white; }
         .badge-resolved { background: #28a745; color: white; }
+        .badge-rejected { background: #dc3545; color: white; }
         .btn-sm { padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 12px; }
         .btn-view { background: #17a2b8; color: white; }
         .logout-btn { background: #dc3545; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; }
@@ -124,7 +125,7 @@ $resolved = $pdo->query("SELECT COUNT(*) FROM baocao WHERE status = 'resolved'")
             <div class="col-md-3">
                 <div class="stat-card text-center">
                     <i class="fas fa-building fa-3x text-info"></i>
-                    <h3 class="mt-2"><?php echo count(array_unique(array_column($reports, 'location'))); ?></h3>
+                    <h3 class="mt-2"><?php echo count(array_unique(array_column($reports, 'diem_xay_ra_su_co'))); ?></h3>
                     <p class="text-muted">Đơn vị báo cáo</p>
                 </div>
             </div>
@@ -169,7 +170,7 @@ $resolved = $pdo->query("SELECT COUNT(*) FROM baocao WHERE status = 'resolved'")
                         <td>
                             <span class="badge badge-<?php echo $report['status']; ?>">
                                 <?php 
-                                $status_map = ['pending'=>'Chờ xử lý', 'processing'=>'Đang xử lý', 'resolved'=>'Đã giải quyết'];
+                                $status_map = ['pending'=>'Chờ xử lý', 'processing'=>'Đang xử lý', 'resolved'=>'Đã giải quyết','rejected' => 'Từ chối'];
                                 echo $status_map[$report['status']] ?? $report['status'];
                                 ?>
                             </span>

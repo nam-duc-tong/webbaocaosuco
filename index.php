@@ -29,7 +29,6 @@
         }
 
         .form-check {
-            display: flex;
             align-items: center;
             margin-bottom: 14px;
         }
