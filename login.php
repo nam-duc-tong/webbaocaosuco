@@ -1,109 +1,239 @@
+<?php
+session_start();
+
+// Nếu đã đăng nhập rồi thì chuyển thẳng vào dashboard
+if (isset($_SESSION['user_logged_in']) && $_SESSION['user_logged_in'] === true) {
+    header("Location: ./admin/dashboard.php");
+    exit();
+}
+
+// Lấy thông báo lỗi từ URL (nếu có)
+$error = isset($_GET['error']) ? $_GET['error'] : '';
+?>
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <title>Trang đăng nhập</title>
+    <title>Đăng nhập hệ thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .login-header i {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .login-header h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .forgot-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .forgot-link:hover {
+            color: #764ba2;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border-left: 4px solid #c53030;
+        }
+
+        .alert i {
+            font-size: 18px;
+        }
     </style>
 </head>
+
 <body>
-    <div class="container  py-5 h-100">
-        <section class="vh-100">
-            <div class="container-fluid h-custom">
-                <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-md-9 col-lg-6 col-xl-5">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-                    class="img-fluid" alt="Sample image">
-                </div>
-                <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                    <form>
-                    <div class="d-flex flex-row align-items-center justify-content-center justify-content-lg-start">
-                        <p class="lead fw-normal mb-0 me-3">Sign in with</p>
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-                        <i class="fab fa-facebook-f"></i>
-                        </button>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-hospital-user"></i>
+                <h2>Chào mừng trở lại!</h2>
+                <p>Đăng nhập để tiếp tục</p>
+            </div>
+            <div class="login-body">
+                <!-- Hiển thị lỗi nếu có -->
+                <?php if ($error == 'db_error'): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-database"></i>
+                        <span>Lỗi kết nối cơ sở dữ liệu. Vui lòng kiểm tra lại!</span>
+                    </div>
+                <?php elseif ($error == 'invalid'): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Sai tên đăng nhập hoặc mật khẩu!</span>
+                    </div>
+                <?php endif; ?>
 
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-                        <i class="fab fa-twitter"></i>
-                        </button>
-
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-floating mx-1">
-                        <i class="fab fa-linkedin-in"></i>
-                        </button>
+                <form method="POST" action="authenticate.php">
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Tên đăng nhập" required>
                     </div>
 
-                    <div class="divider d-flex align-items-center my-4">
-                        <p class="text-center fw-bold mx-3 mb-0">Or</p>
+                    <div class="form-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Mật khẩu" required>
                     </div>
 
-                    <!-- Email input -->
-                    <div data-mdb-input-init class="form-outline mb-4">
-                        <input type="email" id="form3Example3" class="form-control form-control-lg"
-                        placeholder="Enter a valid email address" />
-                        <label class="form-label" for="form3Example3">Email address</label>
-                    </div>
-
-                    <!-- Password input -->
-                    <div data-mdb-input-init class="form-outline mb-3">
-                        <input type="password" id="form3Example4" class="form-control form-control-lg"
-                        placeholder="Enter password" />
-                        <label class="form-label" for="form3Example4">Password</label>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <!-- Checkbox -->
-                        <div class="form-check mb-0">
-                        <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
-                        <label class="form-check-label" for="form2Example3">
-                            Remember me
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember" id="remember">
+                            <span>Ghi nhớ đăng nhập</span>
                         </label>
-                        </div>
-                        <a href="#!" class="text-body">Forgot password?</a>
+                        <a href="#" class="forgot-link">Quên mật khẩu?</a>
                     </div>
 
-                    <div class="text-center text-lg-start mt-4 pt-2">
-                        <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg"
-                        style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-                        <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="#!"
-                            class="link-danger">Register</a></p>
-                    </div>
-
-                    </form>
-                </div>
-                </div>
+                    <button type="submit" class="login-btn">
+                        Đăng nhập
+                    </button>
+                </form>
             </div>
-            <div
-                class="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-                <!-- Copyright -->
-                <div class="text-white mb-3 mb-md-0">
-                Copyright © 2020. All rights reserved.
-                </div>
-                <!-- Copyright -->
-
-                <!-- Right -->
-                <div>
-                <a href="#!" class="text-white me-4">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="#!" class="text-white me-4">
-                    <i class="fab fa-twitter"></i>
-                </a>
-                <a href="#!" class="text-white me-4">
-                    <i class="fab fa-google"></i>
-                </a>
-                <a href="#!" class="text-white">
-                    <i class="fab fa-linkedin-in"></i>
-                </a>
-                </div>
-                <!-- Right -->
-            </div>
-        </section>
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
+
 </html>
