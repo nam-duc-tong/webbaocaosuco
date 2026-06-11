@@ -57,22 +57,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $tinh_chat_su_co = $_POST['tinh_chat_su_co'] ?? '';
     $muc_do_su_co = $_POST['muc_do_su_co'] ?? '';
 
-     // ========== XỬ LÝ PHÂN LOẠI SỰ CỐ (QUAN TRỌNG) ==========
+    // ========== XỬ LÝ PHÂN LOẠI SỰ CỐ (QUAN TRỌNG) ==========
     // Lấy mảng checkbox được chọn
-    $phan_loai_su_co_array = isset($_POST['phan_loai_su_co']) && is_array($_POST['phan_loai_su_co']) 
-        ? $_POST['phan_loai_su_co'] 
+    $phan_loai_su_co_array = isset($_POST['phan_loai_su_co']) && is_array($_POST['phan_loai_su_co'])
+        ? $_POST['phan_loai_su_co']
         : [];
-    
+
     // Lưu vào cột text (dạng chuỗi, ví dụ: "Thuốc, Thiết bị, Hồ sơ")
-    $phan_loai_su_co_text = !empty($phan_loai_su_co_array) 
-        ? implode(', ', $phan_loai_su_co_array) 
+    $phan_loai_su_co_text = !empty($phan_loai_su_co_array)
+        ? implode(', ', $phan_loai_su_co_array)
         : null;
-    
+
     // Lưu vào cột JSON (dạng mảng JSON)
-    $phan_loai_su_co_json = !empty($phan_loai_su_co_array) 
-        ? json_encode($phan_loai_su_co_array, JSON_UNESCAPED_UNICODE) 
+    $phan_loai_su_co_json = !empty($phan_loai_su_co_array)
+        ? json_encode($phan_loai_su_co_array, JSON_UNESCAPED_UNICODE)
         : null;
-    
+
     // DEBUG: Kiểm tra dữ liệu (bỏ comment nếu cần)
     // echo "<pre>";
     // echo "Mảng checkbox: ";
@@ -497,29 +497,26 @@ $phan_loai_da_chon = !empty($report['phan_loai_su_co']) ? explode(', ', $report[
                 </div>
 
                 <!-- Phân loại sự cố -->
+                <!-- Phân loại sự cố trong edit_report.php -->
                 <div class="form-section">
-                    <h5><i class="fas fa-tags"></i> Phân loại sự cố</h5>
+                    <h5><i class="fas fa-tags"></i> Phân loại sự cố <span class="text-danger">*</span></h5>
 
                     <?php
                     // Lấy danh sách phân loại đã chọn
                     $phan_loai_da_chon = [];
 
-                    // Ưu tiên lấy từ cột JSON (sau khi đã đổi sang kiểu JSON)
                     if (!empty($report['phan_loai_su_co_json'])) {
-                        // Nếu cột đã là JSON, fetch ra sẽ là mảng PHP tự động
-                        if (is_string($report['phan_loai_su_co_json'])) {
-                            $phan_loai_da_chon = json_decode($report['phan_loai_su_co_json'], true);
-                        } else {
-                            $phan_loai_da_chon = $report['phan_loai_su_co_json'];
-                        }
-                        if (!is_array($phan_loai_da_chon)) {
-                            $phan_loai_da_chon = [];
-                        }
+                        $phan_loai_da_chon = is_string($report['phan_loai_su_co_json'])
+                            ? json_decode($report['phan_loai_su_co_json'], true)
+                            : $report['phan_loai_su_co_json'];
                     }
 
-                    // Nếu JSON rỗng, lấy từ cột text
                     if (empty($phan_loai_da_chon) && !empty($report['phan_loai_su_co'])) {
                         $phan_loai_da_chon = explode(', ', $report['phan_loai_su_co']);
+                    }
+
+                    if (!is_array($phan_loai_da_chon)) {
+                        $phan_loai_da_chon = [];
                     }
 
                     $categories = [

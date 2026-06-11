@@ -1,6 +1,7 @@
 <?php
 // submit_report.php - Xử lý khi người dùng gửi báo cáo từ website
 require_once(__DIR__ . '/config/database.php');
+require_once(__DIR__ . '/includes/send_mail.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
@@ -11,30 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email'] ?? '');
     $hinhthuc = $_POST['hinhthuc'] ?? '';
 
-    // // Địa điểm
-    // $diem_xay_ra_su_co = $_POST['diem_xay_ra_su_co'] ?? '';
-
-    // // Xử lý "Mục khác" cho địa điểm
-    // if ($diem_xay_ra_su_co == 'Mục khác') {
-    //     $diem_xay_ra_su_co = trim($_POST['diem_xay_ra_su_co_khac'] ?? '');
-    // }
-
-    // Lấy dữ liệu địa điểm
+    // Xử lý địa điểm
     $diem_xay_ra_su_co = $_POST['diem_xay_ra_su_co'] ?? '';
 
-    // Xử lý trường hợp "Mục khác"
     if ($diem_xay_ra_su_co === 'Mục khác') {
         $diem_xay_ra_su_co_khac = trim($_POST['diem_xay_ra_su_co_khac'] ?? '');
-
-        // Validate: bắt buộc phải nhập text khi chọn "Mục khác"
         if (empty($diem_xay_ra_su_co_khac)) {
             $errors[] = "Vui lòng nhập địa điểm cụ thể khi chọn 'Mục khác'";
         } else {
-            // Gán giá trị nhập vào cho địa điểm
             $diem_xay_ra_su_co = $diem_xay_ra_su_co_khac;
         }
     }
-    // Validate chung
     if (empty($diem_xay_ra_su_co)) {
         $errors[] = "Vui lòng chọn hoặc nhập địa điểm xảy ra sự cố";
     }
@@ -43,31 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nhom_su_co = $_POST['nhom_su_co'] ?? '';
     $thoigian = $_POST['thoigian'] ?? '';
 
-    // // Đối tượng
-    // $doi_tuong = $_POST['doi_tuong'] ?? '';
-
-    // // Xử lý "Mục khác" cho đối tượng
-    // if ($doi_tuong == 'Mục khác') {
-    //     $doi_tuong = trim($_POST['doi_tuong_khac'] ?? '');
-    // }
-
-    // Lấy dữ liệu đối tượng
+    // Xử lý đối tượng
     $doi_tuong = $_POST['doi_tuong'] ?? '';
 
-    // Xử lý trường hợp "Mục khác"
     if ($doi_tuong === 'Mục khác') {
         $doi_tuong_khac = trim($_POST['doi_tuong_khac'] ?? '');
-
-        // Validate: bắt buộc phải nhập text khi chọn "Mục khác"
         if (empty($doi_tuong_khac)) {
             $errors[] = "Vui lòng nhập đối tượng cụ thể khi chọn 'Mục khác'";
         } else {
-            // Gán giá trị nhập vào cho đối tượng
             $doi_tuong = $doi_tuong_khac;
         }
     }
-
-    // Validate chung
     if (empty($doi_tuong)) {
         $errors[] = "Vui lòng chọn hoặc nhập đối tượng xảy ra sự cố";
     }
@@ -77,14 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $mo_ta_su_co = trim($_POST['mo_ta_su_co'] ?? '');
     $tinh_chat_su_co = $_POST['tinh_chat_su_co'] ?? '';
 
-    // ========== 2. XỬ LÝ MỨC ĐỘ SỰ CỐ (RADIO) ==========
-    // Giá trị gửi lên sẽ là NC0, NC1, NC2, NC3
+    // ========== 2. XỬ LÝ MỨC ĐỘ SỰ CỐ ==========
     $muc_do_su_co = $_POST['muc_do_su_co'] ?? '';
-
-    // Validate: đảm bảo giá trị hợp lệ
     $valid_muc_do = ['NC0', 'NC1', 'NC2', 'NC3'];
     if (!in_array($muc_do_su_co, $valid_muc_do)) {
-        $muc_do_su_co = ''; // Nếu không hợp lệ thì để trống
+        $muc_do_su_co = '';
     }
 
     // ========== 3. XỬ LÝ PHÂN LOẠI SỰ CỐ (CHECKBOX) ==========
@@ -92,14 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         ? $_POST['phan_loai_su_co']
         : [];
 
-    // Lưu dạng chuỗi (cho cột text)
     $phan_loai_su_co_string = implode(', ', $phan_loai_su_co_array);
-
-    // Lưu dạng JSON (cho cột JSON) - dùng json_encode
     $phan_loai_su_co_json = json_encode($phan_loai_su_co_array, JSON_UNESCAPED_UNICODE);
-
-
-    // Sau đó lưu cả 2 vào database
 
     // ========== 4. CÁC TRƯỜNG XỬ LÝ KHÁC ==========
     $thong_bao_cap_tren = $_POST['thong_bao_cap_tren'] ?? '';
@@ -107,42 +72,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $giai_phap = trim($_POST['giai_phap'] ?? '');
     $ghi_nhan_ho_so = $_POST['ghi_nhan_ho_so'] ?? 'no';
 
-    // ========== 5. DEBUG (TẠM THỜI - CÓ THỂ BỎ SAU KHI CHẠY THỬ) ==========
-    // Bỏ comment để kiểm tra dữ liệu nhận được
-    /*
-    echo "<pre>";
-    echo "=== DỮ LIỆU NHẬN ĐƯỢC ===\n";
-    echo "nguoibaocao: $nguoibaocao\n";
-    echo "email: $email\n";
-    echo "hinhthuc: $hinhthuc\n";
-    echo "diem_xay_ra_su_co: $diem_xay_ra_su_co\n";
-    echo "nhom_su_co: $nhom_su_co\n";
-    echo "thoigian: $thoigian\n";
-    echo "doi_tuong: $doi_tuong\n";
-    echo "thong_tin_nguoi_benh: $thong_tin_nguoi_benh\n";
-    echo "mo_ta_su_co: $mo_ta_su_co\n";
-    echo "tinh_chat_su_co: $tinh_chat_su_co\n";
-    echo "muc_do_su_co: $muc_do_su_co\n";
-    echo "phan_loai_su_co_array: ";
-    print_r($phan_loai_su_co_array);
-    echo "phan_loai_su_co_string: $phan_loai_su_co_string\n";
-    echo "phan_loai_su_co_json: $phan_loai_su_co_json\n";
-    echo "thong_bao_cap_tren: $thong_bao_cap_tren\n";
-    echo "xu_ly_ban_dau: $xu_ly_ban_dau\n";
-    echo "giai_phap: $giai_phap\n";
-    echo "ghi_nhan_ho_so: $ghi_nhan_ho_so\n";
-    echo "</pre>";
-    exit();
-    */
-
-    // ========== 6. VALIDATE DỮ LIỆU BẮT BUỘC ==========
+    // ========== 5. VALIDATE DỮ LIỆU ==========
     $errors = [];
 
     if (empty($nguoibaocao)) {
         $errors[] = "Vui lòng nhập tên người báo cáo";
     }
-    if (empty($diem_xay_ra_su_co)) {
-        $errors[] = "Vui lòng chọn địa điểm xảy ra sự cố";
+    if (empty($email)) {
+        $errors[] = "Vui lòng nhập email để nhận xác nhận báo cáo!";
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Email không đúng định dạng!";
     }
     if (empty($nhom_su_co)) {
         $errors[] = "Vui lòng chọn nhóm sự cố";
@@ -166,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Vui lòng nhập giải pháp phòng ngừa";
     }
 
-    // Nếu có lỗi, quay lại form và hiển thị
+    // Nếu có lỗi, quay lại form
     if (!empty($errors)) {
         $_SESSION['form_errors'] = $errors;
         $_SESSION['old_data'] = $_POST;
@@ -174,11 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    // ========== 7. LƯU VÀO DATABASE ==========
-
-    // Cập nhật câu lệnh SQL để bao gồm cột phan_loai_su_co_json (nếu có)
-    // Nếu bảng của bạn chưa có cột json, hãy bỏ dòng đó đi
-
+    // ========== 6. LƯU VÀO DATABASE ==========
     $sql = "INSERT INTO baocao (
         nguoibaocao, email, hinhthuc, diem_xay_ra_su_co, 
         nhom_su_co, thoigian, doi_tuong, thong_tin_nguoi_benh, 
@@ -217,18 +153,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result) {
         $report_id = $pdo->lastInsertId();
 
+        // ========== 7. CHUẨN BỊ DỮ LIỆU CHO EMAIL ==========
+        $report_data = [
+            'diem_xay_ra_su_co' => $diem_xay_ra_su_co,
+            'nhom_su_co' => $nhom_su_co,
+            'thoigian' => $thoigian,
+            'muc_do_su_co' => $muc_do_su_co,
+            'phan_loai_su_co' => $phan_loai_su_co_string,
+            'mo_ta_su_co' => $mo_ta_su_co
+        ];
+        // DEBUG: Ghi log để kiểm tra
+        error_log("=== BẮT ĐẦU GỬI EMAIL ===");
+        error_log("Email người nhận: " . $email);
+        error_log("Tên người nhận: " . $nguoibaocao);
+        error_log("Mã báo cáo: " . $report_id);
+
+        // ========== 8. GỬI EMAIL XÁC NHẬN ==========
+        if (!empty($email)) {
+            $email_sent = sendConfirmationEmail($email, $nguoibaocao, $report_id, $report_data);
+            if ($email_sent) {
+                $_SESSION['email_status'] = 'Đã gửi email xác nhận đến ' . $email;
+            } else {
+                $_SESSION['email_status'] = 'Không thể gửi email xác nhận (kiểm tra lại email)';
+            }
+        }
+        // ========== THIẾT LẬP THÔNG BÁO ==========
+        $_SESSION['success_message'] = "Báo cáo #" . str_pad($report_id, 5, '0', STR_PAD_LEFT) . " đã được gửi thành công!";
+
+        if ($email_sent) {
+            $_SESSION['email_status'] = "📧 Email xác nhận đã được gửi đến " . $email;
+        } else {
+            $_SESSION['warning_message'] = "Không thể gửi email xác nhận, nhưng báo cáo vẫn được lưu!";
+        }
         // Xóa session lỗi nếu có
         unset($_SESSION['form_errors']);
         unset($_SESSION['old_data']);
 
         // Chuyển đến trang cảm ơn
+        // header("Location: thank_you.php?id=" . $report_id);
         header("Location: index.php");
         exit();
     } else {
         // Lỗi khi lưu database
         $_SESSION['form_errors'] = ['Có lỗi xảy ra khi lưu dữ liệu, vui lòng thử lại!'];
         $_SESSION['old_data'] = $_POST;
-        header("Location: report_form.php");
+        header("Location: index.php");
         exit();
     }
 }
